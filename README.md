@@ -1,6 +1,8 @@
 # HP iLO Metrics Exporter
 
-Exports HP Server Integrated Lights Out (iLO) heath_at_a_glance states to Prometheus gauges
+Exports HP Server Integrated Lights Out (iLO) heath_at_a_glance states to Prometheus gauges, from either a single server (via command line flags) or multiple servers (via query string parameters)
+
+### Gauges
 
 ```
 0 - OK
@@ -8,17 +10,33 @@ Exports HP Server Integrated Lights Out (iLO) heath_at_a_glance states to Promet
 2 - Dead (Other)
 ```
 
+### iLO
+
 ```
 health_at_a_glance:
   battery: {status: OK}
   bios_hardware: {status: OK}
   fans: {redundancy: Redundant, status: OK}
   memory: {status: OK}
-  network: {status: OK}
+  network: {status: Link Down},
   power_supplies: {redundancy: Redundant, status: OK}
   processor: {status: OK}
   storage: {status: Degraded}
   temperature: {status: OK}
+```
+
+### Output
+
+```
+hpilo_battery 0.0
+hpilo_storage 1.0
+hpilo_fans 0.0
+hpilo_bios_hardware 0.0
+hpilo_memory 0.0
+hpilo_power_supplies 0.0
+hpilo_processor 0.0
+hpilo_network 2.0
+hpilo_temperature 0.0
 ```
 
 ## Installing
@@ -29,32 +47,35 @@ To run, you must have `Python` and `pip` installed.
 To install with `pip`:
 
 ```
-pip install hpilo-exporter
+pip install -e $HPILO_EXPORTER_DIR
 ```
 
 Then just:
 
 ```
-hpilo-exporter --ilo-addr=127.0.0.1 --ilo-user=monitoring --ilo-password=monitoring
+hpilo-exporter [--address=0.0.0.0 --port=8080 --ilo-host=127.0.0.1 --ilo-port=443 --ilo-user=monitoring --ilo-password=monitoring]
 ```
 
 ## Docker
 
-To run the container, simply use the below:
+To run the container, assuming it has been built locally:
 
-`docker run -p 8080:8080 infinityworks/hpilo-exporter:latest --ilo-addr=127.0.0.1 --ilo-user=monitoring --ilo-password=monitoring`
+`docker run -p 8080:8080 hpilo-exporter:latest --ilo-addr=127.0.0.1 --ilo-user=monitoring --ilo-password=monitoring`
 
 Example Docker Compose:
 
 ```
   hpilo-exporter:
-    command: --ilo-addr=127.0.0.1 --ilo-user=monitoring --ilo-password=monitoring
-    image: infinityworks/hpilo-exporter:latest
+    command: --address=0.0.0.0 --port=8080 --ilo-host=127.0.0.1 --ilo-port=443 --ilo-user=monitoring --ilo-password=monitoring
+    image: hpilo-exporter:latest
     ports:
     - "8080:8080"
 ```
 
-## TODO
+## Multi iLO communication
 
-- Break out iLO config so we can specify a range of servers
-  - Need to be aware of how Prometheus can call specific servers, maybe query string params
+Using query string parameters to the `/metrics` endpoint you can point the exporter to different iLO's
+
+```
+curl '127.0.0.1:8080/metrics?ilo_host=127.0.0.1&ilo_port=9018&ilo_user=admin&ilo_password=admin'
+```

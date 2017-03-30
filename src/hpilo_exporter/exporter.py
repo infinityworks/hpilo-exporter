@@ -42,6 +42,24 @@ class MetricsHandler(RequestHandler):
         :return: ilo stats data
         """
 
+        # if querystring param exists, overwrite the given value
+        # TODO - improve where this code lives and DRY it out a bit
+        query_ilo_host = self.get_query_arguments("ilo_host", strip=True)
+        if query_ilo_host:
+            ilo_host = ''.join(map(str, query_ilo_host))
+
+        query_ilo_port = self.get_query_arguments("ilo_port", strip=True)
+        if query_ilo_port:
+            ilo_port = ''.join(map(str, query_ilo_port))
+
+        query_ilo_user = self.get_query_arguments("ilo_user", strip=True)
+        if query_ilo_user:
+            ilo_user = ''.join(map(str, query_ilo_user))
+
+        query_ilo_password = self.get_query_arguments("ilo_password", strip=True)
+        if query_ilo_password:
+            ilo_password = ''.join(map(str, query_ilo_password))
+
         data = {}
         try:
             data = hpilo.Ilo(hostname=ilo_host, login=ilo_user, password=ilo_password, timeout=10, port=int(ilo_port)).get_embedded_health()['health_at_a_glance']
@@ -125,7 +143,7 @@ class iLOExporterServer(object):
 
     def print_info(self):
         print("Starting exporter on: http://%s:%s/metrics" % (self._address, self._port))
-        print("For iLO: %s@%s:%s" % (self._ilo_user, self._ilo_host, self._ilo_port))
+        print("Default iLO: %s@%s:%s" % (self._ilo_user, self._ilo_host, self._ilo_port))
         print("Press Ctrl+C to quit")
 
     def run(self):
