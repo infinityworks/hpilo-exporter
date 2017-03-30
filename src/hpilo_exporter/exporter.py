@@ -63,7 +63,7 @@ class MetricsHandler(RequestHandler):
         data = {}
         try:
             data = hpilo.Ilo(hostname=ilo_host, login=ilo_user, password=ilo_password, timeout=10, port=int(ilo_port)).get_embedded_health()['health_at_a_glance']
-        except (HTTPError, Exception) as e:
+        except (Exception) as e:
             print("Error fetching data from iLO (hostname=%s, login=%s, port=%s)") % (ilo_host, ilo_user, ilo_port)
             raise HTTPError(500, str(e))
 
@@ -101,6 +101,8 @@ class MetricsHandler(RequestHandler):
 
         :return: Response with Prometheus metrics snapshot
         """
+
+        # TODO time out the request at hpilo.Ilo(timeout=10)
 
         ilo_stats_data = yield self.fetch_ilo_stats(self.application.ilo_host, self.application.ilo_port, self.application.ilo_user, self.application.ilo_password)
         prometheus = "\n".join(self.parse_ilo_stats_data(ilo_stats_data)) + "\n"
