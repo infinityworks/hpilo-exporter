@@ -2,7 +2,7 @@ import io
 from setuptools import setup, find_packages
 import sys
 
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 PACKAGE_NAME = "hpilo-exporter"
 SOURCE_DIR_NAME = "src"
 
@@ -37,8 +37,8 @@ setup(
         'Development Status :: 2 - Pre-Alpha',
     ],
     install_requires=[
-        "python-hpilo==3.9",
-        "tornado==4.4.2"
+        "python-hpilo>=3.8",
+        "tornado>=3.1.1"
     ],
     entry_points={
         'console_scripts': [
