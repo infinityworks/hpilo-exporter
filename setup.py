@@ -2,7 +2,7 @@ import io
 from setuptools import setup, find_packages
 import sys
 
-VERSION = "0.0.1a1"
+VERSION = "0.1.0"
 PACKAGE_NAME = "hpilo-exporter"
 SOURCE_DIR_NAME = "src"
 
