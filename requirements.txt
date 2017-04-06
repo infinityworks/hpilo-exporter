@@ -1,2 +1,2 @@
 python-hpilo>=3.8
-tornado>=4.3
+tornado<3.2

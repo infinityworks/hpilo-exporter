@@ -44,19 +44,19 @@ class MetricsHandler(RequestHandler):
 
         # if querystring param exists, overwrite the given value
         # TODO - improve where this code lives and DRY it out a bit
-        query_ilo_host = self.get_query_arguments("ilo_host", strip=True)
+        query_ilo_host = self.get_arguments("ilo_host", strip=True)
         if query_ilo_host:
             ilo_host = ''.join(map(str, query_ilo_host))
 
-        query_ilo_port = self.get_query_arguments("ilo_port", strip=True)
+        query_ilo_port = self.get_arguments("ilo_port", strip=True)
         if query_ilo_port:
             ilo_port = ''.join(map(str, query_ilo_port))
 
-        query_ilo_user = self.get_query_arguments("ilo_user", strip=True)
+        query_ilo_user = self.get_arguments("ilo_user", strip=True)
         if query_ilo_user:
             ilo_user = ''.join(map(str, query_ilo_user))
 
-        query_ilo_password = self.get_query_arguments("ilo_password", strip=True)
+        query_ilo_password = self.get_arguments("ilo_password", strip=True)
         if query_ilo_password:
             ilo_password = ''.join(map(str, query_ilo_password))
 
