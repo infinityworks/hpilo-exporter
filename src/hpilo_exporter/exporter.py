@@ -16,7 +16,8 @@ from urlparse import urlparse
 
 
 class ForkingHTTPServer(ForkingMixIn, HTTPServer):
-    pass
+    max_children = 30
+    timeout = 30
 
 
 class RequestHandler(BaseHTTPRequestHandler):
