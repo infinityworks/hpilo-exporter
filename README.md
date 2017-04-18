@@ -77,5 +77,5 @@ Example Docker Compose:
 Using query string parameters to the `/metrics` endpoint you can point the exporter to different iLO's
 
 ```
-curl '127.0.0.1:8080/metrics?ilo_host=127.0.0.1&ilo_port=9018&ilo_user=admin&ilo_password=admin'
+curl 'http://127.0.0.1:8080/metrics?ilo_host=127.0.0.1&ilo_port=9018&ilo_user=admin&ilo_password=admin'
 ```

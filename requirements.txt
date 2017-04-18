@@ -1,2 +1,2 @@
+prometheus-client>=0.0.19
 python-hpilo>=3.8
-tornado<3.2

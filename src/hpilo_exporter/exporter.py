@@ -1,113 +1,106 @@
 """
 Pulls data from specified iLO and presents as Prometheus metrics
 """
-
 import hpilo
+import prometheus_metrics
+import sys
+import traceback
 
-from tornado.gen import coroutine
-from tornado.gen import Return
-from tornado.httpclient import HTTPError
-from tornado.ioloop import IOLoop
-from tornado.web import Application
-from tornado.web import RequestHandler
-
-class MainHandler(RequestHandler):
-    """
-    Redirect into the metrics endpoint
-    """
-
-    def get(self):
-        self.redirect('/metrics')
+from BaseHTTPServer import BaseHTTPRequestHandler
+from BaseHTTPServer import HTTPServer
+from SocketServer import ForkingMixIn
+from prometheus_client import Gauge
+from prometheus_client import generate_latest
+from urlparse import parse_qs
+from urlparse import urlparse
 
 
-class MetricsHandler(RequestHandler):
+class ForkingHTTPServer(ForkingMixIn, HTTPServer):
+    pass
+
+
+class RequestHandler(BaseHTTPRequestHandler):
     """
     Endpoint handler
     """
 
-    @coroutine
-    def fetch_ilo_stats(self, ilo_host, ilo_port, ilo_user, ilo_password):
-        """
-        Fetch iLO stats endpoint, de-serialize JSON and return as Python dict
-
-        0 - OK
-        1 - Degraded
-        2 - Dead (Other)
-
-        :param ilo_host: ilo host
-        :param ilo_port: ilo port
-        :param ilo_user: ilo user
-        :param ilo_password: ilo password
-        :rtype: dict
-        :return: ilo stats data
-        """
-
-        # if querystring param exists, overwrite the given value
-        # TODO - improve where this code lives and DRY it out a bit
-        query_ilo_host = self.get_arguments("ilo_host", strip=True)
-        if query_ilo_host:
-            ilo_host = ''.join(map(str, query_ilo_host))
-
-        query_ilo_port = self.get_arguments("ilo_port", strip=True)
-        if query_ilo_port:
-            ilo_port = ''.join(map(str, query_ilo_port))
-
-        query_ilo_user = self.get_arguments("ilo_user", strip=True)
-        if query_ilo_user:
-            ilo_user = ''.join(map(str, query_ilo_user))
-
-        query_ilo_password = self.get_arguments("ilo_password", strip=True)
-        if query_ilo_password:
-            ilo_password = ''.join(map(str, query_ilo_password))
-
-        data = {}
-        try:
-            data = hpilo.Ilo(hostname=ilo_host, login=ilo_user, password=ilo_password, timeout=10, port=int(ilo_port)).get_embedded_health()['health_at_a_glance']
-        except (Exception) as e:
-            print("Error fetching data from iLO (hostname=%s, login=%s, port=%s)") % (ilo_host, ilo_user, ilo_port)
-            raise HTTPError(500, str(e))
-
-        raise Return(data)
-
-    def parse_ilo_stats_data(self, ilo_stats_data):
-        """
-        Filter key/values pairs from collected iLO stats and output as gauged Prometheus metrics
-
-        :param ilo_stats_data: Collected iLO stats object
-        :type ilo_stats_data: dict
-        :return: Generator of metrics that can be put into Prometheus
-        """
-
-        for key, value in ilo_stats_data.items():
-
-            for status in value.items():
-                if status[0] == 'status':
-                    if status[1] == 'OK':
-                        gauge = 0
-                    elif status[1] == 'Degraded':
-                        gauge = 1
-                    else:
-                        gauge = 2
-
-            if isinstance(gauge, (int, float, bool)):
-                prom_value = float(gauge)
-                prom_str = "hpilo_{} {}".format(key, prom_value)
-                yield prom_str
-
-    @coroutine
-    def get(self):
+    def do_GET(self):
         """
         Process GET request
 
-        :return: Response with Prometheus metrics snapshot
+        :return: Response with Prometheus metrics
         """
+        url = urlparse(self.path)
 
-        # TODO time out the request at hpilo.Ilo(timeout=10)
+        query_components = parse_qs(urlparse(self.path).query)
 
-        ilo_stats_data = yield self.fetch_ilo_stats(self.application.ilo_host, self.application.ilo_port, self.application.ilo_user, self.application.ilo_password)
-        prometheus = "\n".join(self.parse_ilo_stats_data(ilo_stats_data)) + "\n"
-        self.set_header("Content-Type", "text/plain")
-        self.write(prometheus)
+        if url.path == '/metrics':
+
+            query_ilo_host = query_components.get(
+                'ilo_host', self.server.ilo_host)
+            if query_ilo_host:
+                ilo_host = ''.join(map(str, query_ilo_host))
+
+            query_ilo_port = query_components.get(
+                'ilo_port', self.server.ilo_port)
+            if query_ilo_port:
+                ilo_port = ''.join(map(str, query_ilo_port))
+
+            query_ilo_user = query_components.get(
+                'ilo_user', self.server.ilo_user)
+            if query_ilo_user:
+                ilo_user = ''.join(map(str, query_ilo_user))
+
+            query_ilo_password = query_components.get(
+                'ilo_password', self.server.ilo_password)
+            if query_ilo_password:
+                ilo_password = ''.join(map(str, query_ilo_password))
+
+            data = {}
+            try:
+                data = hpilo.Ilo(hostname=ilo_host, login=ilo_user, password=ilo_password, timeout=10, port=int(
+                    ilo_port)).get_embedded_health()['health_at_a_glance']
+
+                for key, value in data.items():
+                    for status in value.items():
+                        if status[0] == 'status':
+                            gauge = 'hpilo_' + key + '_gauge'
+
+                            if status[1] == 'OK':
+                                prometheus_metrics.gauges[gauge].set(0)
+                            elif status[1] == 'Degraded':
+                                prometheus_metrics.gauges[gauge].set(1)
+                            else:
+                                prometheus_metrics.gauges[gauge].set(2)
+
+                metrics = generate_latest(prometheus_metrics.registry)
+
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/plain')
+                self.end_headers()
+                self.wfile.write(metrics)
+
+            except:
+                self.send_response(500)
+                self.end_headers()
+                self.wfile.write(traceback.format_exc())
+
+        elif url.path == '/':
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html')
+            self.end_headers()
+            self.wfile.write("""<html>
+            <head><title>HP iLO Exporter</title></head>
+            <body>
+            <h1>HP iLO Exporter</h1>
+            <p>Visit <code>/metrics</code> to use.</p>
+            </body>
+            </html>""")
+
+        else:
+            self.send_response(404)
+            self.end_headers()
+
 
 class iLOExporterServer(object):
     """
@@ -120,9 +113,9 @@ class iLOExporterServer(object):
 
     # exporter config
     DEFAULT_ILO_HOST = "127.0.0.1"
-    DEFAULT_ILO_PORT = 443
-    DEFAULT_ILO_USER = "admin"
-    DEFAULT_ILO_PASSWORD = "admin"
+    DEFAULT_ILO_PORT = "443"
+    DEFAULT_ILO_USER = "user"
+    DEFAULT_ILO_PASSWORD = "pass"
 
     def __init__(self, address=None, port=None, ilo_host=None, ilo_port=None, ilo_user=None, ilo_password=None):
         self._address = address or self.DEFAULT_HOST
@@ -132,28 +125,27 @@ class iLOExporterServer(object):
         self._ilo_user = ilo_user or self.DEFAULT_ILO_USER
         self._ilo_password = ilo_password or self.DEFAULT_ILO_PASSWORD
 
-    def make_app(self):
-        app = Application([
-            (r"/", MainHandler),
-            (r"/metrics", MetricsHandler),
-        ])
-        app.ilo_host = self._ilo_host
-        app.ilo_port = self._ilo_port
-        app.ilo_user = self._ilo_user
-        app.ilo_password = self._ilo_password
-        return app
-
     def print_info(self):
-        print("Starting exporter on: http://%s:%s/metrics" % (self._address, self._port))
-        print("Default iLO: %s@%s:%s" % (self._ilo_user, self._ilo_host, self._ilo_port))
+        print("Starting exporter on: http://%s:%s/metrics" %
+              (self._address, self._port))
+        print("Default iLO: %s@%s:%s" %
+              (self._ilo_user, self._ilo_host, self._ilo_port))
         print("Press Ctrl+C to quit")
 
     def run(self):
         self.print_info()
-        app = self.make_app()
-        app.listen(self._port, address=self._address)
-        loop = IOLoop.current()
+
+        server = ForkingHTTPServer(
+            (self._address, self._port), RequestHandler)
+
+        server.ilo_host = self._ilo_host
+        server.ilo_port = self._ilo_port
+        server.ilo_user = self._ilo_user
+        server.ilo_password = self._ilo_password
+
         try:
-            loop.start()
+            while True:
+                sys.stdout.flush()
+                server.handle_request()
         except KeyboardInterrupt:
-            loop.stop()
+            print("Killing exporter")

@@ -2,9 +2,10 @@ import io
 from setuptools import setup, find_packages
 import sys
 
-VERSION = "0.1.3"
+VERSION = "0.3.0"
 PACKAGE_NAME = "hpilo-exporter"
 SOURCE_DIR_NAME = "src"
+
 
 def readme():
     with io.open('README.md', 'r', encoding='utf-8') as f:
@@ -23,22 +24,19 @@ setup(
     include_package_data=True,
     zip_safe=False,
     package_data={},
-    license='Apache 2',
+    license='MIT',
     classifiers=[
-        'License :: OSI Approved :: Apache Software License',
-        'Intended Audience :: Developers',
-        'Programming Language :: Python',
+        'Development Status :: 4 - Beta',
+        'Intended Audience :: System Administrators',
+        'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python',
         'Topic :: Internet :: WWW/HTTP',
-        'Development Status :: 2 - Pre-Alpha',
     ],
     install_requires=[
+        "prometheus-client",
         "python-hpilo",
-        "tornado"
     ],
     entry_points={
         'console_scripts': [
