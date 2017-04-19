@@ -37,35 +37,31 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         if url.path == '/metrics':
 
-            query_ilo_host = query_components.get(
-                'ilo_host', self.server.ilo_host)
+            query_ilo_host = query_components.get('ilo_host', [self.server.ilo_host])
             if query_ilo_host:
-                ilo_host = ''.join(map(str, query_ilo_host))
+                ilo_host = query_ilo_host[0]
 
-            query_ilo_port = query_components.get(
-                'ilo_port', self.server.ilo_port)
+            query_ilo_port = query_components.get('ilo_port', [self.server.ilo_port])
             if query_ilo_port:
-                ilo_port = ''.join(map(str, query_ilo_port))
+                ilo_port = int(query_ilo_port[0])
 
-            query_ilo_user = query_components.get(
-                'ilo_user', self.server.ilo_user)
+            query_ilo_user = query_components.get('ilo_user', [self.server.ilo_user])
             if query_ilo_user:
-                ilo_user = ''.join(map(str, query_ilo_user))
+                ilo_user = query_ilo_user[0]
 
-            query_ilo_password = query_components.get(
-                'ilo_password', self.server.ilo_password)
+            query_ilo_password = query_components.get('ilo_password', [self.server.ilo_password])
             if query_ilo_password:
-                ilo_password = ''.join(map(str, query_ilo_password))
+                ilo_password = query_ilo_password[0]
 
             data = {}
             try:
-                data = hpilo.Ilo(hostname=ilo_host, login=ilo_user, password=ilo_password, timeout=10, port=int(
-                    ilo_port)).get_embedded_health()['health_at_a_glance']
+                data = hpilo.Ilo(hostname=ilo_host, login=ilo_user, password=ilo_password,
+                                 port=ilo_port, timeout=10).get_embedded_health()['health_at_a_glance']
 
                 for key, value in data.items():
                     for status in value.items():
                         if status[0] == 'status':
-                            gauge = 'hpilo_' + key + '_gauge'
+                            gauge = 'hpilo_{}_gauge'.format(key)
 
                             if status[1] == 'OK':
                                 prometheus_metrics.gauges[gauge].set(0)
@@ -114,7 +110,7 @@ class iLOExporterServer(object):
 
     # exporter config
     DEFAULT_ILO_HOST = "127.0.0.1"
-    DEFAULT_ILO_PORT = "443"
+    DEFAULT_ILO_PORT = 443
     DEFAULT_ILO_USER = "user"
     DEFAULT_ILO_PASSWORD = "pass"
 
@@ -127,17 +123,14 @@ class iLOExporterServer(object):
         self._ilo_password = ilo_password or self.DEFAULT_ILO_PASSWORD
 
     def print_info(self):
-        print("Starting exporter on: http://%s:%s/metrics" %
-              (self._address, self._port))
-        print("Default iLO: %s@%s:%s" %
-              (self._ilo_user, self._ilo_host, self._ilo_port))
+        print("Starting exporter on: http://{}:{}/metrics".format(self._address, self._port))
+        print("Default iLO: {}@{}:{}".format(self._ilo_user, self._ilo_host, self._ilo_port))
         print("Press Ctrl+C to quit")
 
     def run(self):
         self.print_info()
 
-        server = ForkingHTTPServer(
-            (self._address, int(self._port)), RequestHandler)
+        server = ForkingHTTPServer((self._address, self._port), RequestHandler)
 
         server.ilo_host = self._ilo_host
         server.ilo_port = self._ilo_port

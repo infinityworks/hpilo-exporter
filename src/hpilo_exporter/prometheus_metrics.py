@@ -6,15 +6,12 @@ registry = REGISTRY
 hpilo_battery_gauge = Gauge('hpilo_battery', 'HP iLO battery status')
 hpilo_storage_gauge = Gauge('hpilo_storage', 'HP iLO storage status')
 hpilo_fans_gauge = Gauge('hpilo_fans', 'HP iLO fans status')
-hpilo_bios_hardware_gauge = Gauge(
-    'hpilo_bios_hardware', 'HP iLO bios_hardware status')
+hpilo_bios_hardware_gauge = Gauge('hpilo_bios_hardware', 'HP iLO bios_hardware status')
 hpilo_memory_gauge = Gauge('hpilo_memory', 'HP iLO memory status')
-hpilo_power_supplies_gauge = Gauge(
-    'hpilo_power_supplies', 'HP iLO power_supplies status')
+hpilo_power_supplies_gauge = Gauge('hpilo_power_supplies', 'HP iLO power_supplies status')
 hpilo_processor_gauge = Gauge('hpilo_processor', 'HP iLO processor status')
 hpilo_network_gauge = Gauge('hpilo_network', 'HP iLO network status')
-hpilo_temperature_gauge = Gauge(
-    'hpilo_temperature', 'HP iLO temperature status')
+hpilo_temperature_gauge = Gauge('hpilo_temperature', 'HP iLO temperature status')
 
 gauges = {
     'hpilo_battery_gauge': hpilo_battery_gauge,
