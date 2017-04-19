@@ -137,7 +137,7 @@ class iLOExporterServer(object):
         self.print_info()
 
         server = ForkingHTTPServer(
-            (self._address, self._port), RequestHandler)
+            (self._address, int(self._port)), RequestHandler)
 
         server.ilo_host = self._ilo_host
         server.ilo_port = self._ilo_port
