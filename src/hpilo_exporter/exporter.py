@@ -4,7 +4,6 @@ Pulls data from specified iLO and presents as Prometheus metrics
 import hpilo
 import prometheus_metrics
 import sys
-import traceback
 
 from BaseHTTPServer import BaseHTTPRequestHandler
 from BaseHTTPServer import HTTPServer
@@ -80,7 +79,6 @@ class RequestHandler(BaseHTTPRequestHandler):
             except:
                 self.send_response(500)
                 self.end_headers()
-                self.wfile.write(traceback.format_exc())
 
         elif url.path == '/':
             self.send_response(200)
@@ -101,26 +99,16 @@ class RequestHandler(BaseHTTPRequestHandler):
 
 class iLOExporterServer(object):
     """
-    Basic server implementation that exposes metrics to Prometheus fetcher.
+    Basic server implementation that exposes metrics to Prometheus
     """
 
-    # server config
-    DEFAULT_HOST = "0.0.0.0"
-    DEFAULT_PORT = 8080
-
-    # exporter config
-    DEFAULT_ILO_HOST = "127.0.0.1"
-    DEFAULT_ILO_PORT = 443
-    DEFAULT_ILO_USER = "user"
-    DEFAULT_ILO_PASSWORD = "pass"
-
-    def __init__(self, address=None, port=None, ilo_host=None, ilo_port=None, ilo_user=None, ilo_password=None):
-        self._address = address or self.DEFAULT_HOST
-        self._port = port or self.DEFAULT_PORT
-        self._ilo_host = ilo_host or self.DEFAULT_ILO_HOST
-        self._ilo_port = ilo_port or self.DEFAULT_ILO_PORT
-        self._ilo_user = ilo_user or self.DEFAULT_ILO_USER
-        self._ilo_password = ilo_password or self.DEFAULT_ILO_PASSWORD
+    def __init__(self, address, port, ilo_host, ilo_port, ilo_user, ilo_password):
+        self._address = address
+        self._port = port
+        self._ilo_host = ilo_host
+        self._ilo_port = ilo_port
+        self._ilo_user = ilo_user
+        self._ilo_password = ilo_password
 
     def print_info(self):
         print("Starting exporter on: http://{}:{}/metrics".format(self._address, self._port))
