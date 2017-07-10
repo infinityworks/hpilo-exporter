@@ -18,7 +18,7 @@ setup(
     author="Joe Stringer",
     author_email="joe.stringer@infinityworks.com",
     long_description=readme(),
-    url="https://github.com/infinityworksltd/hpilo-exporter",
+    url="https://github.com/infinityworks/hpilo-exporter",
     package_dir={'': SOURCE_DIR_NAME},
     packages=find_packages(SOURCE_DIR_NAME, exclude=('*.tests',)),
     include_package_data=True,
