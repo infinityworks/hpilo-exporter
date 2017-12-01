@@ -1,4 +1,4 @@
-from prometheus_client import Gauge
+from prometheus_client import Gauge, Summary
 from prometheus_client import REGISTRY
 
 registry = REGISTRY

@@ -1,6 +1,5 @@
 import io
 from setuptools import setup, find_packages
-import sys
 
 VERSION = "0.3.3"
 PACKAGE_NAME = "hpilo-exporter"
@@ -10,6 +9,7 @@ SOURCE_DIR_NAME = "src"
 def readme():
     with io.open('README.md', 'r', encoding='utf-8') as f:
         return f.read()
+
 
 setup(
     name=PACKAGE_NAME,
@@ -40,7 +40,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'hpilo-exporter = hpilo_exporter.__main__:main',
+            'hpilo-exporter = hpilo_exporter.main:main',
         ],
     }
 )

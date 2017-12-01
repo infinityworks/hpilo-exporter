@@ -4,7 +4,7 @@ Entrypoint for the application
 
 import argparse
 
-from hpilo_exporter import iLOExporterServer
+from hpilo_exporter.exporter import ILOExporterServer
 
 
 def main():
@@ -19,5 +19,9 @@ def main():
 
     args = parser.parse_args()
 
-    exposer = iLOExporterServer(**vars(args))
-    exposer.run()
+    exporter = ILOExporterServer(**vars(args))
+    exporter.run()
+
+
+if __name__ == '__main__':
+    main()
