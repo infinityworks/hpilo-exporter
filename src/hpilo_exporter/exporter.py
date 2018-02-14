@@ -84,21 +84,28 @@ class RequestHandler(BaseHTTPRequestHandler):
                 print(e)
 
             # get product and server name
-            product_name = ilo.get_product_name()
-            server_name = ilo.get_server_name()
-
+            try:
+        	product_name = ilo.get_product_name()
+    	    except:
+    		product_name = "Unknown HP Server"
+    		
+    	    try:
+        	server_name = ilo.get_server_name()
+    	    except:
+    		server_name = ""
+	    
             # get health at glance
             health_at_glance = ilo.get_embedded_health()['health_at_a_glance']
+            
             if health_at_glance is not None:
                 for key, value in health_at_glance.items():
                     for status in value.items():
                         if status[0] == 'status':
                             gauge = 'hpilo_{}_gauge'.format(key)
-
-                            if status[1] == 'OK':
+                            if status[1].upper() == 'OK':
                                 prometheus_metrics.gauges[gauge].labels(product_name=product_name,
                                                                         server_name=server_name).set(0)
-                            elif status[1] == 'Degraded':
+                            elif status[1].upper() == 'DEGRADED':
                                 prometheus_metrics.gauges[gauge].labels(product_name=product_name,
                                                                         server_name=server_name).set(1)
                             else:

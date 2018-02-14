@@ -3,6 +3,8 @@ from prometheus_client import REGISTRY
 
 registry = REGISTRY
 
+hpilo_vrm_gauge = Gauge('hpilo_vrm', 'HP iLO vrm status', ["product_name", "server_name"])
+hpilo_drive_gauge = Gauge('hpilo_drive', 'HP iLO drive status', ["product_name", "server_name"])
 hpilo_battery_gauge = Gauge('hpilo_battery', 'HP iLO battery status', ["product_name", "server_name"])
 hpilo_storage_gauge = Gauge('hpilo_storage', 'HP iLO storage status', ["product_name", "server_name"])
 hpilo_fans_gauge = Gauge('hpilo_fans', 'HP iLO fans status', ["product_name", "server_name"])
@@ -16,6 +18,8 @@ hpilo_temperature_gauge = Gauge('hpilo_temperature', 'HP iLO temperature status'
 hpilo_firmware_version = Gauge('hpilo_firmware_version', 'HP iLO firmware version', ["product_name", "server_name"])
 
 gauges = {
+    'hpilo_vrm_gauge': hpilo_vrm_gauge,
+    'hpilo_drive_gauge': hpilo_drive_gauge,
     'hpilo_battery_gauge': hpilo_battery_gauge,
     'hpilo_storage_gauge': hpilo_storage_gauge,
     'hpilo_fans_gauge': hpilo_fans_gauge,
