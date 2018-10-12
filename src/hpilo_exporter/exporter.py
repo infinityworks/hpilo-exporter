@@ -95,7 +95,8 @@ class RequestHandler(BaseHTTPRequestHandler):
     		server_name = ""
 	    
             # get health at glance
-            health_at_glance = ilo.get_embedded_health()['health_at_a_glance']
+            embedded_health = ilo.get_embedded_health()
+            health_at_glance = embedded_health['health_at_a_glance']
             
             if health_at_glance is not None:
                 for key, value in health_at_glance.items():
@@ -111,6 +112,19 @@ class RequestHandler(BaseHTTPRequestHandler):
                             else:
                                 prometheus_metrics.gauges[gauge].labels(product_name=product_name,
                                                                         server_name=server_name).set(2)
+
+            # get nic information
+            for nic_name,nic in embedded_health['nic_information'].items():
+                try:
+                    value = ['OK','Disabled','Unknown','Link Down'].index(nic['status'])
+                except ValueError:
+                    value = 4
+                    print_err('unrecognised nic status: {}'.format(nic['status']))
+
+                prometheus_metrics.hpilo_nic_status_gauge.labels(product_name=product_name,
+                                                                 server_name=server_name,
+                                                                 nic_name=nic_name,
+                                                                 ip_address=nic['ip_address']).set(value)
 
             # get firmware version
             fw_version = ilo.get_fw_version()["firmware_version"]
