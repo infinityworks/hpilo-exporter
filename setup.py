@@ -1,7 +1,7 @@
 import io
 from setuptools import setup, find_packages
 
-VERSION = "0.3.4"
+VERSION = "0.4.5"
 PACKAGE_NAME = "hpilo-exporter"
 SOURCE_DIR_NAME = "src"
 
@@ -18,6 +18,7 @@ setup(
     author="Joe Stringer",
     author_email="joe.stringer@infinityworks.com",
     long_description=readme(),
+    long_description_content_type="text/markdown",
     url="https://github.com/infinityworks/hpilo-exporter",
     package_dir={'': SOURCE_DIR_NAME},
     packages=find_packages(SOURCE_DIR_NAME, exclude=('*.tests',)),
