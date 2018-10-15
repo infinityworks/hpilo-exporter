@@ -61,6 +61,13 @@ Then just:
 hpilo-exporter [--address=0.0.0.0 --port=9416 --endpoint="/metrics"]
 ```
 
+
+HPILO is also available on [Pypi](https://pypi.org/project/hpilo-exporter/) so it can be installed directly:
+
+```
+pip install hpilo-exporter
+```
+
 ### Docker
 
 Prebuild images are available from the docker repository:
