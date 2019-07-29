@@ -85,15 +85,17 @@ class RequestHandler(BaseHTTPRequestHandler):
 
             # get product and server name
             try:
-        	product_name = ilo.get_product_name()
-    	    except:
-    		product_name = "Unknown HP Server"
-    		
-    	    try:
-        	server_name = ilo.get_server_name()
-    	    except:
-    		server_name = ""
-	    
+                product_name = ilo.get_product_name()
+            except:
+                product_name = "Unknown HP Server"
+        
+            try:
+                server_name = ilo.get_server_name()
+                if server_name == "":
+                    server_name = ilo_host
+            except:
+                server_name = ilo_host
+      
             # get health at glance
             health_at_glance = ilo.get_embedded_health()['health_at_a_glance']
             
