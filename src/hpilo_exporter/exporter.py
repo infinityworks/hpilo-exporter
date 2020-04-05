@@ -88,14 +88,14 @@ class RequestHandler(BaseHTTPRequestHandler):
                 product_name = ilo.get_product_name()
             except:
                 product_name = "Unknown HP Server"
-                
+
             try:
                 server_name = ilo.get_server_name()
                 if server_name == "":
                     server_name = ilo_host
             except:
                 server_name = ilo_host
-      
+
             # get health
 	          embedded_health = ilo.get_embedded_health()
             health_at_glance = embedded_health['health_at_a_glance']
