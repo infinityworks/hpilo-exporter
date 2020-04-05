@@ -126,6 +126,7 @@ Assuming:
 ```yml
 - job_name: 'hpilo'
   scrape_interval: 1m
+  scrape_timeout: 30s
   params:
     ilo_port: ['443']
     ilo_user: ['my_ilo_user']
