@@ -97,7 +97,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 server_name = ilo_host
 
             # get health
-	          embedded_health = ilo.get_embedded_health()
+            embedded_health = ilo.get_embedded_health()
             health_at_glance = embedded_health['health_at_a_glance']
             
             if health_at_glance is not None:
