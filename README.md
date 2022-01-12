@@ -93,7 +93,7 @@ curl 'http://127.0.0.1:9416/metrics?ilo_host=127.0.0.1&ilo_port=443&ilo_user=adm
 
 Passing argument to the docker run command
 ```
-docker run -p 9416:9416 hpilo-exporter:latest --port 9416 --ilo_user my_user --ilo_password my_secret_password
+docker run -p 9416:9416 hpilo-exporter:latest --port 9416
 ```
 
 ### Docker compose
@@ -141,6 +141,6 @@ Assuming:
     - source_labels: [__param_ilo_host]
       target_label: ilo_host
     - target_label: __address__
-      replacement: hpilo:8082  # hpilo exporter.
+      replacement: hpilo:9416  # hpilo exporter.
 ```
 
