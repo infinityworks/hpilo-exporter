@@ -1,11 +1,41 @@
 # HP iLO Metrics Exporter
 
-Blackbox likes exporter used to exports HP Server Integrated Lights Out (iLO) states to Prometheus.
+HP iLO likes exporter used to exports HP Server Integrated Lights Out (iLO) states to Prometheus.
 
 # HP iLO Metrics Exporter
 
-Blackbox likes exporter used to exports HP Server Integrated Lights Out (iLO) states to Prometheus.
+HP iLO likes exporter used to exports HP Server Integrated Lights Out (iLO) states to Prometheus.
 
+
+## run systemctl on your linux
+You must run this command for installing hpilo_exporter on your server
+```
+bash hpilo-exporter.sh
+or
+./hpilo-exporter.sh
+```
+afther that add this config on youser prometheus server
+```
+  - job_name: 'hpilo'
+  scrape_interval: 1m
+  scrape_timeout: 30s
+  params:
+    ilo_port: ['443']
+    ilo_user: ['my_ilo_user']
+    ilo_password: ['my_ilo_password']
+  static_configs:
+    - targets:
+      - ilo_fqdn.domain
+
+  relabel_configs:
+    - source_labels: [__address__]
+      target_label: __param_ilo_host
+    - source_labels: [__param_ilo_host]
+      target_label: ilo_host
+    - target_label: __address__
+      replacement: ip:9416  # hpilo exporter.
+```
+And finally You can use custome dashboard on Grafana
 ## dashboard
 https://grafana.com/grafana/dashboards/13709
 
