@@ -11,6 +11,12 @@ Here are the status code of gauge
 2 - Dead (Other)
 ```
 
+Here are the status code of server power
+```
+0 - Off
+1 - On
+2 - Other
+```
 
 ### Output example
 
@@ -43,7 +49,8 @@ hpilo_network{product_name="ProLiant DL360 Gen9",server_name="name.fqdn.domain"}
 hpilo_temperature{product_name="ProLiant DL360 Gen9",server_name="name.fqdn.domain"} 0.0
 hpilo_vrm{product_name="ProLiant DL380 Gen6",server_name="name.fqdn.domain"} 0.0
 hpilo_drive{product_name="ProLiant DL380 Gen6",server_name="name.fqdn.domain"} 0.0
-hpilo_firmware_version{product_name="ProLiant DL360 Gen9",server_name="name.fqdn.domain"} 2.5
+hpilo_firmware_version{product_name="ProLiant DL360 Gen9",server_name="name.fqdn.domain"} 2.78
+hpilo_power_status{product_name="ProLiant DL360 Gen9",server_name="name.fqdn.domain"} 1.0
 ```
 
 ### Installing
