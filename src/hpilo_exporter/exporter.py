@@ -99,9 +99,14 @@ class RequestHandler(BaseHTTPRequestHandler):
             # get health
             embedded_health = ilo.get_embedded_health()
             health_at_glance = embedded_health['health_at_a_glance']
-            
+
+            for module in embedded_health['temperature'].values():
+                if module['status'] != 'Not Installed':
+                    prometheus_metrics.gauges["hpilo_temperature_detail_gauge"].labels(label=module['label'], product_name=product_name, server_name=server_name).set(int(module['currentreading'][0]))
+
             if health_at_glance is not None:
                 for key, value in health_at_glance.items():
+
                     for status in value.items():
                         if status[0] == 'status':
                             gauge = 'hpilo_{}_gauge'.format(key)
