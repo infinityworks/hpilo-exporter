@@ -2,6 +2,8 @@
 
 Blackbox likes exporter used to exports HP Server Integrated Lights Out (iLO) states to Prometheus.
 
+Sample data: https://jsoneditoronline.org/#left=cloud.ed5e0fe56d8d4e0f94a53576c879f404&right=local.nalera
+
 ### Gauges
 
 Here are the status code of gauge
