@@ -104,6 +104,12 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if module['status'] != 'Not Installed':
                     prometheus_metrics.gauges["hpilo_temperature_detail_gauge"].labels(label=module['label'], product_name=product_name, server_name=server_name).set(int(module['currentreading'][0]))
 
+            prometheus_metrics.gauges["hpilo_power_supplies_reading_gauge"].labels(product_name=product_name, server_name=server_name).set(int(embedded_health['power_supply_summary']['present_power_reading'].split()[0]))
+
+
+            for fan in embedded_health['fans'].values():
+                prometheus_metrics.gauges["hpilo_fans_speed_percent_gauge"].labels(fan_status=fan['status'], fan_name=fan['label'], fan_id=fan['label'].split()[-1], product_name=product_name, server_name=server_name).set(int(fan['speed'][0]))
+
             if health_at_glance is not None:
                 for key, value in health_at_glance.items():
 
