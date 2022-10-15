@@ -96,6 +96,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             except:
                 server_name = ilo_host
 
+
             # get health
             embedded_health = ilo.get_embedded_health()
             health_at_glance = embedded_health['health_at_a_glance']
@@ -106,7 +107,6 @@ class RequestHandler(BaseHTTPRequestHandler):
 
             prometheus_metrics.gauges["hpilo_power_supplies_reading_gauge"].labels(product_name=product_name, server_name=server_name).set(int(embedded_health['power_supply_summary']['present_power_reading'].split()[0]))
 
-
             for fan in embedded_health['fans'].values():
                 prometheus_metrics.gauges["hpilo_fans_speed_percent_gauge"].labels(fan_status=fan['status'], fan_name=fan['label'], fan_id=fan['label'].split()[-1], product_name=product_name, server_name=server_name).set(int(fan['speed'][0]))
 
@@ -115,6 +115,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 total_memory_size = 0 if (cpu['total_memory_size'] == 'N/A') else int(cpu['total_memory_size'].split()[0])
                 prometheus_metrics.gauges["hpilo_memory_detail_gauge"].labels(product_name=product_name, server_name=server_name, cpu_id=cpu_idx.split("_")[1], operating_frequency=cpu['operating_frequency'], operating_voltage=cpu['operating_voltage']).set(total_memory_size)
 
+            for psu in embedded_health['power_supplies'].values():
+                capacity_w = 0 if psu["capacity"] == "N/A" else int(psu["capacity"].split()[0])
+                prometheus_metrics.gauges["hpilo_power_supplies_detail_gauge"].labels(product_name=product_name, server_name=server_name, psu_id=psu['label'].split()[-1], label=psu['label'], status=psu['status'], capacity_w=capacity_w, present=psu["present"]).set(1 if "Good" in psu["status"] else 0)
 
             if health_at_glance is not None:
                 for key, value in health_at_glance.items():

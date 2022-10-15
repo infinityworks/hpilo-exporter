@@ -13,6 +13,7 @@ hpilo_bios_hardware_gauge = Gauge('hpilo_bios_hardware', 'HP iLO bios_hardware s
 hpilo_memory_gauge = Gauge('hpilo_memory', 'HP iLO memory status', ["product_name", "server_name"])
 hpilo_memory_detail_gauge = Gauge('hpilo_memory_detail', 'HP iLO memory detail info', ["product_name", "server_name", "cpu_id", "operating_frequency", "operating_voltage"])
 hpilo_power_supplies_gauge = Gauge('hpilo_power_supplies', 'HP iLO power_supplies status', ["product_name","server_name"])
+hpilo_power_supplies_detail_gauge = Gauge('hpilo_power_supplies_detail', 'HP iLO power_supplies detail', ["product_name","server_name", "psu_id", "label", "status", "capacity_w", "present"])
 hpilo_power_supplies_reading_gauge = Gauge('hpilo_power_supplies_reading', 'HP iLO power_supplies reading', ["product_name","server_name"])
 hpilo_processor_gauge = Gauge('hpilo_processor', 'HP iLO processor status', ["product_name", "server_name"])
 hpilo_network_gauge = Gauge('hpilo_network', 'HP iLO network status', ["product_name", "server_name"])
@@ -33,6 +34,7 @@ gauges = {
     'hpilo_memory_gauge': hpilo_memory_gauge,
     'hpilo_memory_detail_gauge': hpilo_memory_detail_gauge,
     'hpilo_power_supplies_gauge': hpilo_power_supplies_gauge,
+    'hpilo_power_supplies_detail_gauge': hpilo_power_supplies_detail_gauge,
     'hpilo_power_supplies_reading_gauge': hpilo_power_supplies_reading_gauge,
     'hpilo_processor_gauge': hpilo_processor_gauge,
     'hpilo_network_gauge': hpilo_network_gauge,
