@@ -110,6 +110,12 @@ class RequestHandler(BaseHTTPRequestHandler):
             for fan in embedded_health['fans'].values():
                 prometheus_metrics.gauges["hpilo_fans_speed_percent_gauge"].labels(fan_status=fan['status'], fan_name=fan['label'], fan_id=fan['label'].split()[-1], product_name=product_name, server_name=server_name).set(int(fan['speed'][0]))
 
+
+            for cpu_idx, cpu in embedded_health['memory']['memory_details_summary'].items():
+                total_memory_size = 0 if (cpu['total_memory_size'] == 'N/A') else int(cpu['total_memory_size'].split()[0])
+                prometheus_metrics.gauges["hpilo_memory_detail_gauge"].labels(product_name=product_name, server_name=server_name, cpu_id=cpu_idx.split("_")[1], operating_frequency=cpu['operating_frequency'], operating_voltage=cpu['operating_voltage']).set(total_memory_size)
+
+
             if health_at_glance is not None:
                 for key, value in health_at_glance.items():
 
