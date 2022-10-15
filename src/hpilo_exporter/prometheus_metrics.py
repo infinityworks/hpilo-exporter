@@ -16,6 +16,7 @@ hpilo_power_supplies_gauge = Gauge('hpilo_power_supplies', 'HP iLO power_supplie
 hpilo_power_supplies_detail_gauge = Gauge('hpilo_power_supplies_detail', 'HP iLO power_supplies detail', ["product_name","server_name", "psu_id", "label", "status", "capacity_w", "present"])
 hpilo_power_supplies_reading_gauge = Gauge('hpilo_power_supplies_reading', 'HP iLO power_supplies reading', ["product_name","server_name"])
 hpilo_processor_gauge = Gauge('hpilo_processor', 'HP iLO processor status', ["product_name", "server_name"])
+hpilo_processor_detail_gauge = Gauge('hpilo_processor_detail', 'HP iLO processor detail', ["product_name", "server_name", "name", "status", "cpu_id", "speed"])
 hpilo_network_gauge = Gauge('hpilo_network', 'HP iLO network status', ["product_name", "server_name"])
 hpilo_temperature_gauge = Gauge('hpilo_temperature', 'HP iLO temperature status', ["product_name", "server_name"])
 hpilo_temperature_detail_gauge = Gauge('hpilo_temperature_detail', 'HP iLO temperature detail', ["product_name", "server_name", "label"])
@@ -37,6 +38,7 @@ gauges = {
     'hpilo_power_supplies_detail_gauge': hpilo_power_supplies_detail_gauge,
     'hpilo_power_supplies_reading_gauge': hpilo_power_supplies_reading_gauge,
     'hpilo_processor_gauge': hpilo_processor_gauge,
+    'hpilo_processor_detail_gauge': hpilo_processor_detail_gauge,
     'hpilo_network_gauge': hpilo_network_gauge,
     'hpilo_temperature_gauge': hpilo_temperature_gauge,
     'hpilo_temperature_detail_gauge': hpilo_temperature_detail_gauge,
