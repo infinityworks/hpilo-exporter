@@ -96,24 +96,59 @@ class RequestHandler(BaseHTTPRequestHandler):
             except:
                 server_name = ilo_host
 
+
             # get health
             embedded_health = ilo.get_embedded_health()
             health_at_glance = embedded_health['health_at_a_glance']
-            
+
+            for module in embedded_health['temperature'].values():
+                if module['status'] != 'Not Installed':
+                    prometheus_metrics.gauges["hpilo_temperature_detail_gauge"].labels(label=module['label'], product_name=product_name, server_name=server_name).set(int(module['currentreading'][0]))
+
+            present_power_reading = int(embedded_health['power_supply_summary']['present_power_reading'].split()[0])
+            prometheus_metrics.gauges["hpilo_power_supplies_reading_gauge"].labels(product_name=product_name, server_name=server_name).set(present_power_reading)
+
+            for fan in embedded_health['fans'].values():
+                prometheus_metrics.gauges["hpilo_fans_speed_percent_gauge"].labels(fan_status=fan['status'], fan_name=fan['label'], fan_id=fan['label'].split()[-1], product_name=product_name, server_name=server_name).set(0 if present_power_reading == 0 else int(fan['speed'][0]))
+
+            memory_detail = embedded_health['memory']['memory_details_summary'] if 'memory_details_summary' in embedded_health['memory'] else embedded_health['memory']['memory_components']
+
+            # For HP server Gen 8 or lower
+            if 'memory_details_summary' in embedded_health['memory']:
+                for cpu_idx, cpu in memory_detail.items():
+                    total_memory_size = 0 if (cpu['total_memory_size'] == 'N/A') else int(cpu['total_memory_size'].split()[0])
+                    prometheus_metrics.gauges["hpilo_memory_detail_gauge"].labels(product_name=product_name, server_name=server_name, cpu_id=cpu_idx.split("_")[1], operating_frequency=cpu['operating_frequency'], operating_voltage=cpu['operating_voltage']).set(total_memory_size)
+
+            # For HP server Gen 9 or higher
+            if 'memory_components' in embedded_health['memory']:
+                memory_components = embedded_health['memory']['memory_components']
+                for cpu_idx in range(0, len(memory_components)):
+                    cpu = memory_components[cpu_idx]
+                    total_memory_size = 0 if (cpu[1][1]['value'] == 'Not Installed') else int(cpu[1][1]['value'].split(' ')[0]) / 1024
+                    operating_frequency = cpu[2][1]['value']
+                    # Not expose operating_voltage
+                    prometheus_metrics.gauges["hpilo_memory_detail_gauge"].labels(product_name=product_name, server_name=server_name, cpu_id=cpu_idx, operating_frequency=operating_frequency, operating_voltage='').set(total_memory_size)
+
+            for psu in embedded_health['power_supplies'].values():
+                capacity_w = 0 if psu["capacity"] == "N/A" else int(psu["capacity"].split()[0])
+                prometheus_metrics.gauges["hpilo_power_supplies_detail_gauge"].labels(product_name=product_name, server_name=server_name, psu_id=psu['label'].split()[-1], label=psu['label'], status=psu['status'], capacity_w=capacity_w, present=psu["present"]).set(1 if "Good" in psu["status"] else 0)
+
+            for cpu in embedded_health['processors'].values():
+                prometheus_metrics.gauges["hpilo_processor_detail_gauge"].labels(product_name=product_name, server_name=server_name, cpu_id=cpu['label'].split()[1], name=cpu['name'].strip(), status=cpu['status'], speed=cpu['speed']).set(1 if "OK" in cpu["status"] else 0)
+
             if health_at_glance is not None:
                 for key, value in health_at_glance.items():
+
                     for status in value.items():
                         if status[0] == 'status':
                             gauge = 'hpilo_{}_gauge'.format(key)
                             if status[1].upper() == 'OK':
-                                prometheus_metrics.gauges[gauge].labels(product_name=product_name,
-                                                                        server_name=server_name).set(0)
+                                prometheus_metrics.gauges[gauge].labels(product_name=product_name,server_name=server_name).set(0)
                             elif status[1].upper() == 'DEGRADED':
-                                prometheus_metrics.gauges[gauge].labels(product_name=product_name,
-                                                                        server_name=server_name).set(1)
+                                prometheus_metrics.gauges[gauge].labels(product_name=product_name,server_name=server_name).set(1)
                             else:
-                                prometheus_metrics.gauges[gauge].labels(product_name=product_name,
-                                                                        server_name=server_name).set(2)
+                                prometheus_metrics.gauges[gauge].labels(product_name=product_name,server_name=server_name).set(2)
+
             #for iLO3 patch network
             if ilo.get_fw_version()["management_processor"] == 'iLO3':
                 print_err('Unknown iLO nic status')
