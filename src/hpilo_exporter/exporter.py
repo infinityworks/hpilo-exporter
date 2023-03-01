@@ -124,7 +124,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 memory_components = embedded_health['memory']['memory_components']
                 for cpu_idx in range(0, len(memory_components)):
                     cpu = memory_components[cpu_idx]
-                    total_memory_size = 0 if (cpu[1][1]['value'] == 'Not Installed') else int(cpu[1][1]['value'].split(' ')[0])
+                    total_memory_size = 0 if (cpu[1][1]['value'] == 'Not Installed') else int(cpu[1][1]['value'].split(' ')[0]) / 1024
                     operating_frequency = cpu[2][1]['value']
                     # Not expose operating_voltage
                     prometheus_metrics.gauges["hpilo_memory_detail_gauge"].labels(product_name=product_name, server_name=server_name, cpu_id=cpu_idx, operating_frequency=operating_frequency, operating_voltage='').set(total_memory_size)
@@ -143,14 +143,12 @@ class RequestHandler(BaseHTTPRequestHandler):
                         if status[0] == 'status':
                             gauge = 'hpilo_{}_gauge'.format(key)
                             if status[1].upper() == 'OK':
-                                prometheus_metrics.gauges[gauge].labels(product_name=product_name,
-                                                                        server_name=server_name).set(0)
+                                prometheus_metrics.gauges[gauge].labels(product_name=product_name,server_name=server_name).set(0)
                             elif status[1].upper() == 'DEGRADED':
-                                prometheus_metrics.gauges[gauge].labels(product_name=product_name,
-                                                                        server_name=server_name).set(1)
+                                prometheus_metrics.gauges[gauge].labels(product_name=product_name,server_name=server_name).set(1)
                             else:
-                                prometheus_metrics.gauges[gauge].labels(product_name=product_name,
-                                                                        server_name=server_name).set(2)
+                                prometheus_metrics.gauges[gauge].labels(product_name=product_name,server_name=server_name).set(2)
+
             #for iLO3 patch network
             if ilo.get_fw_version()["management_processor"] == 'iLO3':
                 print_err('Unknown iLO nic status')
