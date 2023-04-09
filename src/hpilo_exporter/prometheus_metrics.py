@@ -33,4 +33,5 @@ gauges = {
     'hpilo_temperature_gauge': hpilo_temperature_gauge,
     'hpilo_firmware_version': hpilo_firmware_version,
     'hpilo_power_status_gauge': hpilo_power_status_gauge,
+    'hpilo_nic_status_gauge': hpilo_nic_status_gauge,
 }
