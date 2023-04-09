@@ -136,7 +136,18 @@ class RequestHandler(BaseHTTPRequestHandler):
             # prometheus_metrics.hpilo_firmware_version.set(fw_version)
             prometheus_metrics.hpilo_firmware_version.labels(product_name=product_name,
                                                              server_name=server_name).set(fw_version)
+            # get power status
+            power_status = ilo.get_host_power_status()
+            # prometheus_metrics.hpilo_power_status.set(power_id)
+            if power_status.upper() == "ON" :
+                power_id = 1
+            elif power_status.upper() == "OFF" :
+                power_id = 0
+            else :
+                power_id = 2
+            prometheus_metrics.hpilo_power_status_gauge.labels(product_name=product_name,server_name=server_name).set(power_id)
 
+            
             # get the amount of time the request took
             REQUEST_TIME.observe(time.time() - start_time)
 
