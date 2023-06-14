@@ -1,2 +1,2 @@
-prometheus-client>=0.0.19
-python-hpilo>=3.8
+prometheus-client>=0.17.0
+python-hpilo>=4.4.3

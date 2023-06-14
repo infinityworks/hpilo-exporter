@@ -1,19 +1,15 @@
 """
 Pulls data from specified iLO and presents as Prometheus metrics
 """
-from __future__ import print_function
 from _socket import gaierror
 import sys
 import hpilo
-
 import time
-import prometheus_metrics
-from BaseHTTPServer import BaseHTTPRequestHandler
-from BaseHTTPServer import HTTPServer
-from SocketServer import ForkingMixIn
+from . import prometheus_metrics
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from socketserver import ForkingMixIn
+from urllib.parse import parse_qs, urlparse
 from prometheus_client import generate_latest, Summary
-from urlparse import parse_qs
-from urlparse import urlparse
 
 
 def print_err(*args, **kwargs):
@@ -61,7 +57,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             ilo_port = int(query_components['ilo_port'][0])
             ilo_user = query_components['ilo_user'][0]
             ilo_password = query_components['ilo_password'][0]
-        except KeyError, e:
+        except KeyError as e:
             print_err("missing parameter %s" % e)
             self.return_error()
             error_detected = True
@@ -80,7 +76,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             except gaierror:
                 print("ILO invalid address or port")
                 self.return_error()
-            except hpilo.IloCommunicationError, e:
+            except hpilo.IloCommunicationError as e:
                 print(e)
 
             # get product and server name
@@ -136,6 +132,26 @@ class RequestHandler(BaseHTTPRequestHandler):
             # prometheus_metrics.hpilo_firmware_version.set(fw_version)
             prometheus_metrics.hpilo_firmware_version.labels(product_name=product_name,
                                                              server_name=server_name).set(fw_version)
+
+            health_data = ilo.get_embedded_health()
+            for name, val in (health_data.get('processors') or {}).items():
+                if "speed" in val:
+                    prometheus_metrics.hpilo_cpu_speed_gauge.labels(product_name=product_name,
+                        server_name=server_name,
+                        name=val.get('name'),
+                        label=val.get('label') or name).set(float(val["speed"].split(' ')[0]))
+            for name, val in (health_data.get('fans') or {}).items():
+                if "speed" in val:
+                    prometheus_metrics.hpilo_fan_speed_gauge.labels(product_name=product_name,
+                        server_name=server_name,
+                        name=name,
+                        zone=val.get('zone') or '').set(val.get('speed')[0])
+            for name, val in (health_data.get('temperature') or {}).items():
+                if "currentreading" in val and val["currentreading"][0] != 0 and val["currentreading"][0] != "N":
+                    prometheus_metrics.hpilo_temperature_value_gauge.labels(product_name=product_name,
+                        server_name=server_name,
+                        name=name,
+                        location=val.get('location') or '').set(val["currentreading"][0])
 
             # get the amount of time the request took
             REQUEST_TIME.observe(time.time() - start_time)

@@ -36,8 +36,8 @@ setup(
         'Topic :: Internet :: WWW/HTTP',
     ],
     install_requires=[
-        "prometheus-client",
-        "python-hpilo",
+        "prometheus-client>=0.17.0",
+        "python-hpilo>=4.4.3"
     ],
     entry_points={
         'console_scripts': [

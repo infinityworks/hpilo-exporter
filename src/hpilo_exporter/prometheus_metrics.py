@@ -17,6 +17,11 @@ hpilo_network_gauge = Gauge('hpilo_network', 'HP iLO network status', ["product_
 hpilo_temperature_gauge = Gauge('hpilo_temperature', 'HP iLO temperature status', ["product_name", "server_name"])
 hpilo_firmware_version = Gauge('hpilo_firmware_version', 'HP iLO firmware version', ["product_name", "server_name"])
 
+hpilo_nic_status_gauge = Gauge('hpilo_nic_status', 'HP iLO NIC status', ["product_name", "server_name", "nic_name", "ip_address"])
+hpilo_cpu_speed_gauge = Gauge('hpilo_cpu_speed', 'HP iLO CPU speed', ["product_name", "server_name", "name", "label"])
+hpilo_fan_speed_gauge = Gauge('hpilo_fan_speed', 'HP iLO fan speed', ["product_name", "server_name", "name", "zone"])
+hpilo_temperature_value_gauge = Gauge('hpilo_temperature_value', 'HP iLO temperature', ["product_name", "server_name", "name", "location"])
+
 gauges = {
     'hpilo_vrm_gauge': hpilo_vrm_gauge,
     'hpilo_drive_gauge': hpilo_drive_gauge,
@@ -30,4 +35,8 @@ gauges = {
     'hpilo_network_gauge': hpilo_network_gauge,
     'hpilo_temperature_gauge': hpilo_temperature_gauge,
     'hpilo_firmware_version': hpilo_firmware_version,
+    'hpilo_nic_status_gauge': hpilo_nic_status_gauge,
+    'hpilo_cpu_speed_gauge': hpilo_cpu_speed_gauge,
+    'hpilo_fan_speed_gauge': hpilo_fan_speed_gauge,
+    'hpilo_temperature_value_gauge': hpilo_temperature_value_gauge,
 }
