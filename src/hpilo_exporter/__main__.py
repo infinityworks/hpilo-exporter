@@ -4,7 +4,7 @@ Entrypoint for the application
 
 import argparse
 
-from hpilo_exporter.exporter import ILOExporterServer
+from .exporter import ILOExporterServer
 
 
 def main():
